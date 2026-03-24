@@ -1,0 +1,21 @@
+{
+  "name": "k2-swarm",
+  "version": "1.0.0",
+  "description": "Production multi-agent AI orchestration system on Cloudflare Workers using K2-Think-v2",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "type-check": "tsc --noEmit",
+    "secret": "wrangler secret put K2_API_KEY",
+    "tail": "wrangler tail",
+    "tail:production": "wrangler tail --env production"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.80.0"
+  }
+}

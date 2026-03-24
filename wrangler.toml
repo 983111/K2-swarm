@@ -1,0 +1,35 @@
+name = "k2-swarm"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Worker limits
+# Free tier: 100k requests/day, 10ms CPU per request
+# Paid tier (Workers Paid): 10ms–30s CPU, 50ms+ subrequests allowed
+# For LLM streaming (long-running) you need the Paid plan
+
+[vars]
+# Public base URL for K2 API — safe to commit
+K2_BASE_URL = "https://api.k2think.ai/v1"
+
+# ⚠️  Never put K2_API_KEY in wrangler.toml.
+# Instead, set it as a secret:
+#   wrangler secret put K2_API_KEY
+# Then enter your key when prompted.
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+# ─── Environments ────────────────────────────────────────────────────────────
+
+[env.staging]
+name = "k2-swarm-staging"
+vars = { K2_BASE_URL = "https://api.k2think.ai/v1" }
+
+[env.production]
+name = "k2-swarm-production"
+vars = { K2_BASE_URL = "https://api.k2think.ai/v1" }
+
+# ─── Build ────────────────────────────────────────────────────────────────────
+# Wrangler uses esbuild under the hood — no extra config needed for TypeScript.
