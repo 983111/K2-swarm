@@ -36,6 +36,26 @@ function badRequest(msg: string): Response {
   return json({ error: msg }, 400);
 }
 
+function toEnvString(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
+function resolveEnv(env?: Partial<Env>): Env {
+  const maybeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  const processEnv = maybeProcess?.env ?? {};
+  const keyFromBinding = toEnvString((env as { K2_API_KEY?: unknown } | undefined)?.K2_API_KEY);
+  const keyFromProcess = toEnvString(processEnv.K2_API_KEY);
+  const baseUrlFromBinding = toEnvString((env as { K2_BASE_URL?: unknown } | undefined)?.K2_BASE_URL);
+  const baseUrlFromProcess = toEnvString(processEnv.K2_BASE_URL);
+
+  return {
+    K2_API_KEY: keyFromBinding || keyFromProcess,
+    K2_BASE_URL: baseUrlFromBinding || baseUrlFromProcess || "https://api.k2think.ai/v1",
+  };
+}
+
 function html(body: string, status = 200): Response {
   return new Response(body, {
     status,
@@ -464,12 +484,14 @@ async function handleChat(req: Request, env: Env): Promise<Response> {
 
 // ─── Route: GET /health ───────────────────────────────────────────────────────
 
-function handleHealth(): Response {
+function handleHealth(env: Env): Response {
   return json({
     status: "ok",
     service: "k2-swarm",
     model: "MBZUAI-IFM/K2-Think-v2",
     agents: ["orchestrator", "researcher", "coder", "writer", "critic", "summarizer", "planner", "formatter"],
+    k2_configured: Boolean(env.K2_API_KEY),
+    k2_base_url: env.K2_BASE_URL,
     timestamp: new Date().toISOString(),
   });
 }
@@ -496,6 +518,7 @@ function handleAgentList(): Response {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const runtimeEnv = resolveEnv(env);
     const url = new URL(request.url);
     const method = request.method.toUpperCase();
 
@@ -509,28 +532,16 @@ export default {
         return handleHome();
 
       case "GET /health":
-        return handleHealth();
+        return handleHealth(runtimeEnv);
 
       case "GET /v1/agents":
         return handleAgentList();
 
       case "POST /v1/swarm":
-        if (!env.K2_API_KEY) {
-          return json(
-            { error: "K2_API_KEY is not configured. Set it in wrangler.toml or Worker secrets." },
-            500
-          );
-        }
-        return handleSwarm(request, env);
+        return handleSwarm(request, runtimeEnv);
 
       case "POST /v1/chat":
-        if (!env.K2_API_KEY) {
-          return json(
-            { error: "K2_API_KEY is not configured. Set it in wrangler.toml or Worker secrets." },
-            500
-          );
-        }
-        return handleChat(request, env);
+        return handleChat(request, runtimeEnv);
 
       default:
         return notFound();

@@ -11,7 +11,9 @@
     "type-check": "tsc --noEmit",
     "secret": "wrangler secret put K2_API_KEY",
     "tail": "wrangler tail",
-    "tail:production": "wrangler tail --env production"
+    "tail:production": "wrangler tail --env production",
+    "dev:vercel": "vercel dev",
+    "deploy:vercel": "vercel --prod"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241022.0",
