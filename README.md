@@ -93,9 +93,13 @@ Returns system status and agent list.
   "status": "ok",
   "service": "k2-swarm",
   "model": "MBZUAI-IFM/K2-Think-v2",
-  "agents": ["orchestrator", "researcher", "coder", "writer", ...]
+  "agents": ["orchestrator", "researcher", "coder", "writer", ...],
+  "k2_configured": true,
+  "k2_base_url": "https://api.k2think.ai/v1"
 }
 ```
+
+Use `k2_configured` to quickly verify whether your deployment has `K2_API_KEY` available at runtime.
 
 ---
 
