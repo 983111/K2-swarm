@@ -36,13 +36,23 @@ function badRequest(msg: string): Response {
   return json({ error: msg }, 400);
 }
 
+function toEnvString(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
 function resolveEnv(env?: Partial<Env>): Env {
   const maybeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
   const processEnv = maybeProcess?.env ?? {};
+  const keyFromBinding = toEnvString((env as { K2_API_KEY?: unknown } | undefined)?.K2_API_KEY);
+  const keyFromProcess = toEnvString(processEnv.K2_API_KEY);
+  const baseUrlFromBinding = toEnvString((env as { K2_BASE_URL?: unknown } | undefined)?.K2_BASE_URL);
+  const baseUrlFromProcess = toEnvString(processEnv.K2_BASE_URL);
 
   return {
-    K2_API_KEY: env?.K2_API_KEY?.trim() || processEnv.K2_API_KEY || "",
-    K2_BASE_URL: env?.K2_BASE_URL?.trim() || processEnv.K2_BASE_URL || "https://api.k2think.ai/v1",
+    K2_API_KEY: keyFromBinding || keyFromProcess,
+    K2_BASE_URL: baseUrlFromBinding || baseUrlFromProcess || "https://api.k2think.ai/v1",
   };
 }
 
@@ -528,27 +538,9 @@ export default {
         return handleAgentList();
 
       case "POST /v1/swarm":
-        if (!runtimeEnv.K2_API_KEY) {
-          return json(
-            {
-              error:
-                "K2_API_KEY is not configured. Set a Worker secret (`wrangler secret put K2_API_KEY`) or a runtime env var (Vercel: Project Settings → Environment Variables).",
-            },
-            500
-          );
-        }
         return handleSwarm(request, runtimeEnv);
 
       case "POST /v1/chat":
-        if (!runtimeEnv.K2_API_KEY) {
-          return json(
-            {
-              error:
-                "K2_API_KEY is not configured. Set a Worker secret (`wrangler secret put K2_API_KEY`) or a runtime env var (Vercel: Project Settings → Environment Variables).",
-            },
-            500
-          );
-        }
         return handleChat(request, runtimeEnv);
 
       default:
