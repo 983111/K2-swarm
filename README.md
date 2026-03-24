@@ -61,6 +61,25 @@ npm run deploy            # deploys to k2-swarm.<your-subdomain>.workers.dev
 npm run deploy:production # deploys to k2-swarm-production
 ```
 
+### 4b. Deploy to Vercel (Edge Functions)
+
+This repo is now Vercel-ready via `api/index.ts` + `vercel.json` and runs on the Edge Runtime.
+
+1. In Vercel project settings, add environment variables:
+   - `K2_API_KEY` (required)
+   - `K2_BASE_URL` (optional, defaults to `https://api.k2think.ai/v1`)
+2. Deploy:
+
+```bash
+npm run deploy:vercel
+```
+
+For local Vercel dev:
+
+```bash
+npm run dev:vercel
+```
+
 ---
 
 ## API Reference
@@ -74,9 +93,13 @@ Returns system status and agent list.
   "status": "ok",
   "service": "k2-swarm",
   "model": "MBZUAI-IFM/K2-Think-v2",
-  "agents": ["orchestrator", "researcher", "coder", "writer", ...]
+  "agents": ["orchestrator", "researcher", "coder", "writer", ...],
+  "k2_configured": true,
+  "k2_base_url": "https://api.k2think.ai/v1"
 }
 ```
+
+Use `k2_configured` to quickly verify whether your deployment has `K2_API_KEY` available at runtime.
 
 ---
 
@@ -221,7 +244,10 @@ k2-swarm/
 │   └── tools/
 │       ├── registry.ts   Tool schemas (function calling)
 │       └── executor.ts   Tool implementations
+├── api/
+│   └── index.ts          Vercel Edge entrypoint
 ├── wrangler.toml
+├── vercel.json           Vercel routing/runtime config
 ├── package.json
 └── tsconfig.json
 ```
@@ -232,9 +258,9 @@ k2-swarm/
 
 | Variable      | Where to set         | Required |
 |---------------|----------------------|----------|
-| `K2_API_KEY`  | `wrangler secret`    | ✅ Yes   |
-| `K2_BASE_URL` | `wrangler.toml vars` | ✅ Yes   |
-| `BRAVE_API_KEY` | `wrangler secret`  | Optional |
+| `K2_API_KEY`  | Cloudflare secret or Vercel env | ✅ Yes   |
+| `K2_BASE_URL` | `wrangler.toml` vars or Vercel env | Optional (defaults to K2 API URL) |
+| `BRAVE_API_KEY` | Cloudflare secret or Vercel env | Optional |
 
 ---
 
