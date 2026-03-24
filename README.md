@@ -123,7 +123,7 @@ curl -X POST http://localhost:8787/v1/swarm \
 
 **Example JavaScript client:**
 ```javascript
-const res = await fetch('https://k2-swarm.your-subdomain.workers.dev/v1/swarm', {
+const res = await fetch('https://k2-swarm.vishwajeetadkine.workers.dev/v1/swarm', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ message: 'Research and summarize the latest AI news' })
